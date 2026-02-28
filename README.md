@@ -126,6 +126,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## ✉️ Contact
 
-**Sohan Fardin** - [GitHub](https://github.com/sohanfardin) - fardin.sohan@example.com
+**Sohan Fardin** - [GitHub](https://github.com/sohancreation)
 
 Project Link: [https://github.com/sohancreation/boikhatamm](https://github.com/sohancreation/boikhatamm)
