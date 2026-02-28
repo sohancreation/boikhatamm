@@ -479,7 +479,7 @@ const Dashboard = () => {
                   onClick={() => handleQuickActionClick(action.href, locked)}
                   className={`w-full h-full min-h-[120px] card-gradient border-2 rounded-xl p-4 flex flex-col gap-2 transition-all group ${locked
                     ? "opacity-60 border-border"
-                    : `hover:-translate-y-1 hover:shadow-glow-primary border-${baseColor}/60 hover:border-${baseColor} bg-${baseColor}/5`
+                    : `hover:-translate-y-1 hover:shadow-glow-primary border-blue-500/60 hover:border-blue-500 bg-blue-500/5`
                     }`}
                 >
                   <div className="flex items-center justify-between">
