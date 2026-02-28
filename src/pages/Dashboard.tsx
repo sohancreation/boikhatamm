@@ -468,17 +468,18 @@ const Dashboard = () => {
           <Zap className="w-5 h-5 text-primary" />
           {t("Quick Actions", "দ্রুত অ্যাকশন")}
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
           {quickActions.map((action, i) => {
             const locked = !canAccess(action.plan);
+            const baseColor = action.color.split("-")[1]; // e.g., 'primary', 'secondary'
             return (
               <motion.div key={action.href} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.02 }} className="h-full">
                 <button
                   type="button"
                   onClick={() => handleQuickActionClick(action.href, locked)}
-                  className={`w-full h-full min-h-[110px] card-gradient border rounded-xl p-3.5 flex flex-col gap-1.5 transition-all group ${locked
+                  className={`w-full h-full min-h-[120px] card-gradient border-2 rounded-xl p-4 flex flex-col gap-2 transition-all group ${locked
                     ? "opacity-60 border-border"
-                    : `hover:-translate-y-1 hover:shadow-glow-primary ${action.color.replace("text-", "border-")}/50 hover:${action.color.replace("text-", "border-")}`
+                    : `hover:-translate-y-1 hover:shadow-glow-primary border-${baseColor}/60 hover:border-${baseColor} bg-${baseColor}/5`
                     }`}
                 >
                   <div className="flex items-center justify-between">
