@@ -468,7 +468,7 @@ const Dashboard = () => {
           <Zap className="w-5 h-5 text-primary" />
           {t("Quick Actions", "দ্রুত অ্যাকশন")}
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {quickActions.map((action, i) => {
             const locked = !canAccess(action.plan);
             return (
@@ -478,7 +478,7 @@ const Dashboard = () => {
                   onClick={() => handleQuickActionClick(action.href, locked)}
                   className={`w-full h-full min-h-[110px] card-gradient border rounded-xl p-3.5 flex flex-col gap-1.5 transition-all group ${locked
                     ? "opacity-60 border-border"
-                    : `hover:-translate-y-1 hover:shadow-glow-primary ${action.color.replace("text-", "border-")}/30 hover:${action.color.replace("text-", "border-")}/60`
+                    : `hover:-translate-y-1 hover:shadow-glow-primary ${action.color.replace("text-", "border-")}/50 hover:${action.color.replace("text-", "border-")}`
                     }`}
                 >
                   <div className="flex items-center justify-between">
