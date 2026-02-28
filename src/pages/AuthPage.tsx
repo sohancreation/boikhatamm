@@ -194,6 +194,8 @@ const AuthPage = () => {
     const params = new URLSearchParams(location.search);
     if (params.get("signup") === "true") {
       setIsLogin(false);
+    } else if (params.get("signup") === "false") {
+      setIsLogin(true);
     }
   }, [location]);
 
