@@ -97,13 +97,12 @@ const AppLayout = () => {
             <Link
               key={item.href}
               to={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                (item as any).premium
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${(item as any).premium
                   ? "bg-gradient-to-r from-yellow-500/20 via-amber-400/20 to-yellow-600/20 text-amber-500 hover:from-yellow-500/30 hover:via-amber-400/30 hover:to-yellow-600/30 font-bold"
                   : isActive(item.href)
-                  ? "bg-sidebar-accent text-sidebar-primary"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-              }`}
+                    ? "bg-sidebar-accent text-sidebar-primary"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                }`}
             >
               <item.icon className={`w-5 h-5 flex-shrink-0 ${(item as any).premium ? "text-amber-400" : ""}`} />
               <span>{item.label}</span>
@@ -132,7 +131,7 @@ const AppLayout = () => {
             <Sparkles className="w-3.5 h-3.5 ml-auto text-amber-400" />
           </Link>
           <button
-            onClick={() => { signOut(); navigate("/"); }}
+            onClick={async () => { await signOut(); navigate("/auth?signup=true"); }}
             className="flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-sidebar-accent rounded-lg w-full transition-colors"
           >
             <LogOut className="w-4 h-4" /> {t("Logout", "লগআউট")}
@@ -186,13 +185,12 @@ const AppLayout = () => {
                     key={item.href}
                     to={item.href}
                     onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                      (item as any).premium
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${(item as any).premium
                         ? "bg-gradient-to-r from-yellow-500/20 via-amber-400/20 to-yellow-600/20 text-amber-500 hover:from-yellow-500/30 hover:via-amber-400/30 hover:to-yellow-600/30 font-bold"
                         : isActive(item.href)
-                        ? "bg-sidebar-accent text-sidebar-primary"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-                    }`}
+                          ? "bg-sidebar-accent text-sidebar-primary"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                      }`}
                   >
                     <item.icon className={`w-5 h-5 ${(item as any).premium ? "text-amber-400" : ""}`} />
                     <span>{item.label}</span>
@@ -216,7 +214,7 @@ const AppLayout = () => {
                   {t("Premium", "প্রিমিয়াম")}
                   <Sparkles className="w-3.5 h-3.5 ml-auto text-amber-400" />
                 </Link>
-                <button onClick={() => { signOut(); navigate("/"); setSidebarOpen(false); }} className="flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-sidebar-accent rounded-lg w-full">
+                <button onClick={async () => { await signOut(); navigate("/auth?signup=true"); setSidebarOpen(false); }} className="flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-sidebar-accent rounded-lg w-full">
                   <LogOut className="w-4 h-4" /> {t("Logout", "লগআউট")}
                 </button>
               </div>

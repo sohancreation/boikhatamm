@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -188,6 +188,14 @@ const AuthPage = () => {
   const { isDark, toggleTheme } = useTheme();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("signup") === "true") {
+      setIsLogin(false);
+    }
+  }, [location]);
 
   const ADMIN_EMAIL = "sohan420rahman@gmail.com";
 
@@ -510,10 +518,10 @@ const AuthPage = () => {
 
                   <div>
                     <label className="text-sm font-medium text-foreground">{t("Current Class", "বর্তমান শ্রেণি")} *</label>
-                    <select value={classLevel} onChange={(e) => { 
+                    <select value={classLevel} onChange={(e) => {
                       const val = e.target.value;
-                      setClassLevel(val); 
-                      setSubjectGroup(""); setUniversityName(""); setUniversityNameOther(""); setDepartment(""); setDepartmentOther(""); 
+                      setClassLevel(val);
+                      setSubjectGroup(""); setUniversityName(""); setUniversityNameOther(""); setDepartment(""); setDepartmentOther("");
                       if (val === "Job Candidate") { setIsJobCandidate(true); } else { setIsJobCandidate(false); setJobSector(""); setJobType(""); setJobRole(""); setJobIndustry(""); }
                     }} required className={selectClass}>
                       <option value="">{t("Select class", "শ্রেণি নির্বাচন করো")}</option>

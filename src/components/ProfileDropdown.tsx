@@ -683,7 +683,7 @@ const ProfileDropdown = () => {
 
             {/* Logout */}
             <div className="border-t border-border p-2">
-              <button onClick={() => { signOut(); navigate("/"); setOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm rounded-lg hover:bg-destructive/10 text-destructive transition-colors">
+              <button onClick={async () => { await signOut(); navigate("/auth?signup=true"); setOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm rounded-lg hover:bg-destructive/10 text-destructive transition-colors">
                 <LogOut className="w-4 h-4" /> {t("Logout", "লগআউট")}
               </button>
             </div>

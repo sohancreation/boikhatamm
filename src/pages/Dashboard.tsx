@@ -134,7 +134,7 @@ const Dashboard = () => {
     if (!user) return;
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
+
     // Fetch from multiple sources for better streak accuracy
     const [progressRes, quizRes, doubtRes] = await Promise.all([
       supabase
@@ -155,16 +155,16 @@ const Dashboard = () => {
         .eq("user_id", user.id)
         .gte("created_at", thirtyDaysAgo.toISOString()),
     ]);
-    
+
     const dates = new Set<string>();
     (progressRes.data || []).forEach(r => { if (r.completed_at) dates.add(new Date(r.completed_at).toISOString().split("T")[0]); });
     (quizRes.data || []).forEach(r => { if (r.created_at) dates.add(new Date(r.created_at).toISOString().split("T")[0]); });
     (doubtRes.data || []).forEach(r => { if (r.created_at) dates.add(new Date(r.created_at).toISOString().split("T")[0]); });
-    
+
     setStudyDates(dates);
-    
+
     if (dates.size === 0) { setDynamicStreak(0); return; }
-    
+
     let streak = 0;
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const todayStr = today.toISOString().split("T")[0];
@@ -414,9 +414,8 @@ const Dashboard = () => {
       {/* Trial/Subscription Banners - RIGHT AFTER Progress Hero */}
       {trialDaysLeft !== null && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          className={`rounded-xl p-3.5 flex items-center justify-between flex-wrap gap-3 ${
-            trialDaysLeft > 0 ? "bg-gradient-to-r from-primary/15 to-secondary/15 border border-primary/20" : "bg-destructive/10 border border-destructive/20"
-          }`}
+          className={`rounded-xl p-3.5 flex items-center justify-between flex-wrap gap-3 ${trialDaysLeft > 0 ? "bg-gradient-to-r from-primary/15 to-secondary/15 border border-primary/20" : "bg-destructive/10 border border-destructive/20"
+            }`}
         >
           <div className="flex items-center gap-3">
             <div className={`w-9 h-9 rounded-full flex items-center justify-center ${trialDaysLeft > 0 ? "bg-primary/20" : "bg-destructive/20"}`}>
@@ -434,13 +433,12 @@ const Dashboard = () => {
 
       {subscriptionDaysLeft !== null && trialDaysLeft === null && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          className={`rounded-xl p-3.5 flex items-center justify-between flex-wrap gap-3 border ${
-            subscriptionDaysLeft <= 5
-              ? "bg-destructive/15 border-destructive/30"
-              : subscriptionDaysLeft <= 10
+          className={`rounded-xl p-3.5 flex items-center justify-between flex-wrap gap-3 border ${subscriptionDaysLeft <= 5
+            ? "bg-destructive/15 border-destructive/30"
+            : subscriptionDaysLeft <= 10
               ? "bg-destructive/10 border-destructive/20"
               : "bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20"
-          }`}
+            }`}
         >
           <div className="flex items-center gap-3">
             <Crown className={`w-5 h-5 ${subscriptionDaysLeft <= 10 ? "text-destructive" : "text-primary"}`} />
@@ -456,9 +454,8 @@ const Dashboard = () => {
             </div>
           </div>
           {subscriptionDaysLeft <= 10 && (
-            <Link to="/pricing" className={`px-4 py-2 rounded-lg text-sm font-semibold ${
-              subscriptionDaysLeft <= 5 ? "bg-destructive text-destructive-foreground" : "bg-primary text-primary-foreground"
-            }`}>
+            <Link to="/pricing" className={`px-4 py-2 rounded-lg text-sm font-semibold ${subscriptionDaysLeft <= 5 ? "bg-destructive text-destructive-foreground" : "bg-primary text-primary-foreground"
+              }`}>
               <Zap className="w-4 h-4 inline mr-1" /> {t("Renew", "রিনিউ")}
             </Link>
           )}
@@ -475,13 +472,12 @@ const Dashboard = () => {
           {quickActions.map((action, i) => {
             const locked = !canAccess(action.plan);
             return (
-              <motion.div key={action.href} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.02 }}>
+              <motion.div key={action.href} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.02 }} className="h-full">
                 <button
                   type="button"
                   onClick={() => handleQuickActionClick(action.href, locked)}
-                  className={`card-gradient border border-border rounded-xl p-3.5 flex flex-col gap-1.5 transition-all group h-full ${
-                    locked ? "opacity-60" : "hover:-translate-y-1 hover:shadow-glow-primary hover:border-primary/30"
-                  }`}
+                  className={`w-full h-full min-h-[110px] card-gradient border border-border rounded-xl p-3.5 flex flex-col gap-1.5 transition-all group ${locked ? "opacity-60" : "hover:-translate-y-1 hover:shadow-glow-primary hover:border-primary/30"
+                    }`}
                 >
                   <div className="flex items-center justify-between">
                     <action.icon className={`w-6 h-6 ${action.color}`} />
@@ -548,13 +544,13 @@ const Dashboard = () => {
                   <span className="text-base">{aiInsight.tip_icon || "💡"}</span>
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-primary/80">
                     {aiInsight.tip_category === "study_technique" ? t("Study Technique", "পড়ার কৌশল") :
-                     aiInsight.tip_category === "memorization" ? t("Memorization", "মুখস্থ কৌশল") :
-                     aiInsight.tip_category === "skill_development" ? t("Skill Development", "দক্ষতা উন্নয়ন") :
-                     aiInsight.tip_category === "self_improvement" ? t("Self Improvement", "আত্মউন্নয়ন") :
-                     aiInsight.tip_category === "time_management" ? t("Time Management", "সময় ব্যবস্থাপনা") :
-                     aiInsight.tip_category === "exam_prep" ? t("Exam Prep", "পরীক্ষার প্রস্তুতি") :
-                     aiInsight.tip_category === "focus" ? t("Focus", "মনোযোগ") :
-                     t("Practical Tip", "ব্যবহারিক পরামর্শ")}
+                      aiInsight.tip_category === "memorization" ? t("Memorization", "মুখস্থ কৌশল") :
+                        aiInsight.tip_category === "skill_development" ? t("Skill Development", "দক্ষতা উন্নয়ন") :
+                          aiInsight.tip_category === "self_improvement" ? t("Self Improvement", "আত্মউন্নয়ন") :
+                            aiInsight.tip_category === "time_management" ? t("Time Management", "সময় ব্যবস্থাপনা") :
+                              aiInsight.tip_category === "exam_prep" ? t("Exam Prep", "পরীক্ষার প্রস্তুতি") :
+                                aiInsight.tip_category === "focus" ? t("Focus", "মনোযোগ") :
+                                  t("Practical Tip", "ব্যবহারিক পরামর্শ")}
                   </span>
                 </div>
               )}
@@ -598,9 +594,9 @@ const Dashboard = () => {
         </div>
         <AnimatePresence>
           {showShop && (
-            <CoinShop coins={coins} onBuy={async (type, id, cost) => { 
-              const result = await gamification.buyItem(type, id, cost); 
-              await fetchOwnedItems(); 
+            <CoinShop coins={coins} onBuy={async (type, id, cost) => {
+              const result = await gamification.buyItem(type, id, cost);
+              await fetchOwnedItems();
               if (result?.success && id === "dark_pro") setThemeMode("dark_pro");
             }} onClose={() => setShowShop(false)} ownedItems={ownedItems} />
           )}
@@ -630,7 +626,7 @@ const Dashboard = () => {
               )}
             </div>
           </div>
-          
+
           {/* Streak milestone */}
           {dynamicStreak > 0 && (
             <div className="mb-3 p-2.5 rounded-lg bg-gradient-to-r from-destructive/5 to-primary/5 border border-destructive/10">
@@ -639,12 +635,12 @@ const Dashboard = () => {
                 <span className="font-bold text-destructive">
                   {dynamicStreak < 7 ? `${7 - dynamicStreak} ${t("days to 🏅 7-day!", "দিন বাকি 🏅 ৭ দিন!")}`
                     : dynamicStreak < 30 ? `${30 - dynamicStreak} ${t("days to 🏆 30-day!", "দিন বাকি 🏆 ৩০ দিন!")}`
-                    : `🔥 ${t("Legendary!", "কিংবদন্তি!")}`}
+                      : `🔥 ${t("Legendary!", "কিংবদন্তি!")}`}
                 </span>
               </div>
             </div>
           )}
-          
+
           {/* 21-day calendar grid */}
           <div className="grid grid-cols-7 gap-1">
             {Array.from({ length: 21 }, (_, i) => {
@@ -655,7 +651,7 @@ const Dashboard = () => {
               const isFuture = false;
               const dayNum = d.getDate();
               const showWeekday = i < 7;
-              
+
               return (
                 <div key={i} className="text-center">
                   {showWeekday && (
@@ -667,19 +663,18 @@ const Dashboard = () => {
                     initial={{ scale: 0.5, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: i * 0.015, type: "spring", stiffness: 300 }}
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-semibold mx-auto transition-all relative ${
-                    isToday
-                        ? isStudied
-                          ? "bg-primary text-primary-foreground ring-2 ring-primary/40 shadow-md"
-                          : "bg-destructive/20 text-destructive ring-2 ring-destructive/30 font-bold"
-                        : isStudied
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-semibold mx-auto transition-all relative ${isToday
+                      ? isStudied
+                        ? "bg-primary text-primary-foreground ring-2 ring-primary/40 shadow-md"
+                        : "bg-destructive/20 text-destructive ring-2 ring-destructive/30 font-bold"
+                      : isStudied
                         ? "bg-primary/80 text-primary-foreground shadow-sm"
                         : "bg-destructive/10 text-destructive/70"
-                    }`}
+                      }`}
                     title={`${d.toLocaleDateString()} ${isStudied ? "✓" : ""}`}
                   >
                     {isStudied ? (
-                      <motion.span 
+                      <motion.span
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: i * 0.015 + 0.1, type: "spring" }}
@@ -695,7 +690,7 @@ const Dashboard = () => {
               );
             })}
           </div>
-          
+
           {/* Summary */}
           <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground pt-2 border-t border-border/50">
             <span>{t("Last 21 days", "গত ২১ দিন")}: {studyDates.size} {t("active", "সক্রিয়")}</span>
@@ -728,9 +723,8 @@ const Dashboard = () => {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className={`flex items-center gap-3 p-2 rounded-lg transition-all ${
-                  p.isUser ? "bg-primary/10 border border-primary/20" : "hover:bg-accent/30"
-                }`}
+                className={`flex items-center gap-3 p-2 rounded-lg transition-all ${p.isUser ? "bg-primary/10 border border-primary/20" : "hover:bg-accent/30"
+                  }`}
               >
                 <span className="text-lg w-8 text-center">{p.medal || `#${p.rank}`}</span>
                 <span className="flex-1 text-sm font-medium text-foreground">
