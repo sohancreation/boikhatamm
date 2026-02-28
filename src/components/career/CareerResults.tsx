@@ -1,0 +1,215 @@
+import { useState, useEffect, useRef } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Map, BarChart3, CalendarDays, ArrowLeft, Loader2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import { motion } from "framer-motion";
+import type { CareerProfile } from "./CareerProfileForm";
+
+interface Props {
+  profile: CareerProfile;
+  onBack: () => void;
+}
+
+type TabKey = "career-mapping" | "readiness-score" | "year-action-plan";
+
+const CareerResults = ({ profile, onBack }: Props) => {
+  const { t, lang: language } = useLanguage();
+  const { user } = useAuth();
+  const savedRef = useRef(false);
+  const [activeTab, setActiveTab] = useState<TabKey>("career-mapping");
+  const [results, setResults] = useState<Record<TabKey, string>>({
+    "career-mapping": "", "readiness-score": "", "year-action-plan": "",
+  });
+  const [loading, setLoading] = useState<Record<TabKey, boolean>>({
+    "career-mapping": false, "readiness-score": false, "year-action-plan": false,
+  });
+  const [scores, setScores] = useState<Record<string, number> | null>(null);
+
+  const streamResult = async (action: TabKey) => {
+    if (results[action]) return; // already fetched
+    setLoading(prev => ({ ...prev, [action]: true }));
+
+    try {
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/career-mentor`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ action, profile, language }),
+        }
+      );
+
+      if (!resp.ok || !resp.body) throw new Error("Stream failed");
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let fullText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        let idx: number;
+        while ((idx = buffer.indexOf("\n")) !== -1) {
+          let line = buffer.slice(0, idx);
+          buffer = buffer.slice(idx + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (!line.startsWith("data: ")) continue;
+          const json = line.slice(6).trim();
+          if (json === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(json);
+            const content = parsed.choices?.[0]?.delta?.content;
+            if (content) {
+              fullText += content;
+              setResults(prev => ({ ...prev, [action]: fullText }));
+
+              // Parse scores if readiness
+              if (action === "readiness-score") {
+                const match = fullText.match(/SCORES_JSON:\s*(\{[^}]+\})/);
+                if (match) {
+                  try { setScores(JSON.parse(match[1])); } catch {}
+                }
+              }
+            }
+          } catch {}
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      setResults(prev => ({ ...prev, [action]: t("Error loading results. Please try again.", "ফলাফল লোড করতে সমস্যা। আবার চেষ্টা করো।") }));
+    } finally {
+      setLoading(prev => ({ ...prev, [action]: false }));
+      // Save career results after all tabs loaded
+      if (user && !savedRef.current) {
+        const allDone = Object.values(loading).every(v => !v);
+        if (allDone) {
+          savedRef.current = true;
+          supabase.from("career_results").insert({
+            user_id: user.id,
+            profile_data: profile as any,
+            results_data: results as any,
+          } as any).then(() => {});
+        }
+      }
+    }
+  };
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab as TabKey);
+    streamResult(tab as TabKey);
+  };
+
+  // Auto-load first tab
+  if (!results["career-mapping"] && !loading["career-mapping"]) {
+    streamResult("career-mapping");
+  }
+
+  const scoreLabels: Record<string, string> = {
+    technical: t("Technical Skills", "টেকনিক্যাল স্কিল"),
+    softSkills: t("Soft Skills", "সফট স্কিল"),
+    internship: t("Internship", "ইন্টার্নশিপ"),
+    portfolio: t("Portfolio", "পোর্টফোলিও"),
+    cv: t("CV/Resume", "সিভি/রেজিউমি"),
+    onlinePresence: t("Online Presence", "অনলাইন উপস্থিতি"),
+    extracurricular: t("Extracurricular", "এক্সট্রা-কারিকুলার"),
+    academic: t("Academic", "একাডেমিক"),
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-4">
+      <Button variant="ghost" onClick={onBack} className="mb-2">
+        <ArrowLeft className="w-4 h-4 mr-1" /> {t("Back to Profile", "প্রোফাইলে ফিরে যাও")}
+      </Button>
+
+      {/* Profile summary */}
+      <Card className="card-gradient border-border">
+        <CardContent className="py-4 flex flex-wrap gap-3 text-sm">
+          <span className="bg-primary/10 text-primary px-3 py-1 rounded-full font-medium">🎓 {profile.university}</span>
+          <span className="bg-primary/10 text-primary px-3 py-1 rounded-full font-medium">🧪 {profile.department}</span>
+          <span className="bg-secondary/10 text-secondary px-3 py-1 rounded-full font-medium">📊 CGPA: {profile.cgpa}</span>
+          <span className="bg-secondary/10 text-secondary px-3 py-1 rounded-full font-medium">📅 {profile.year}</span>
+          <span className="bg-accent text-accent-foreground px-3 py-1 rounded-full font-medium">🎯 {profile.careerGoal}</span>
+        </CardContent>
+      </Card>
+
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <TabsList className="grid grid-cols-3 w-full">
+          <TabsTrigger value="career-mapping" className="gap-1 text-xs sm:text-sm">
+            <Map className="w-4 h-4" /> {t("Career Map", "ক্যারিয়ার ম্যাপ")}
+          </TabsTrigger>
+          <TabsTrigger value="readiness-score" className="gap-1 text-xs sm:text-sm">
+            <BarChart3 className="w-4 h-4" /> {t("Readiness", "প্রস্তুতি")}
+          </TabsTrigger>
+          <TabsTrigger value="year-action-plan" className="gap-1 text-xs sm:text-sm">
+            <CalendarDays className="w-4 h-4" /> {t("Action Plan", "অ্যাকশন প্ল্যান")}
+          </TabsTrigger>
+        </TabsList>
+
+        {(["career-mapping", "readiness-score", "year-action-plan"] as TabKey[]).map(tab => (
+          <TabsContent key={tab} value={tab}>
+            {/* Readiness scores dashboard */}
+            {tab === "readiness-score" && scores && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                <Card className="mb-4 border-border">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      📊 {t("Career Readiness Score", "ক্যারিয়ার রেডিনেস স্কোর")}:
+                      <span className={`text-2xl ${scores.overall >= 70 ? "text-green-500" : scores.overall >= 40 ? "text-secondary" : "text-destructive"}`}>
+                        {scores.overall}%
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {Object.entries(scoreLabels).map(([key, label]) => (
+                      <div key={key} className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-muted-foreground">{label}</span>
+                          <span className="font-bold text-foreground">{scores[key] ?? 0}%</span>
+                        </div>
+                        <Progress value={scores[key] ?? 0} className="h-2" />
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
+            <Card className="border-border">
+              <CardContent className="pt-6">
+                {loading[tab] && !results[tab] ? (
+                  <div className="flex items-center justify-center py-12 gap-2 text-muted-foreground">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    {t("AI is analyzing...", "AI বিশ্লেষণ করছে...")}
+                  </div>
+                ) : (
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <ReactMarkdown>{
+                      tab === "readiness-score"
+                        ? results[tab].replace(/SCORES_JSON:\s*\{[^}]+\}/, "")
+                        : results[tab]
+                    }</ReactMarkdown>
+                    {loading[tab] && <span className="inline-block w-2 h-4 bg-primary animate-pulse rounded-sm ml-1" />}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        ))}
+      </Tabs>
+    </div>
+  );
+};
+
+export default CareerResults;

@@ -1,0 +1,31 @@
+project_id = "bcwmhztlxozibwqbmwle"
+
+[functions.doubt-solver]
+verify_jwt = false
+
+[functions.generate-course]
+verify_jwt = false
+
+[functions.ai-insight]
+verify_jwt = false
+
+[functions.study-planner]
+verify_jwt = false
+
+[functions.quiz-engine]
+verify_jwt = false
+
+[functions.career-mentor]
+verify_jwt = false
+
+[functions.skill-mentor]
+verify_jwt = false
+
+[functions.study-abroad]
+verify_jwt = false
+
+[functions.research-mentor]
+verify_jwt = false
+
+[functions.project-helper]
+verify_jwt = false

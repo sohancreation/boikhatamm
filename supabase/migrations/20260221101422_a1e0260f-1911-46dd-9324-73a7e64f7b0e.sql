@@ -1,0 +1,2 @@
+ALTER TABLE public.user_subscriptions DROP CONSTRAINT user_subscriptions_payment_method_check;
+ALTER TABLE public.user_subscriptions ADD CONSTRAINT user_subscriptions_payment_method_check CHECK (payment_method = ANY (ARRAY['bkash', 'nagad', 'card', 'free', 'admin_granted', 'manual_approval', 'trial']));
